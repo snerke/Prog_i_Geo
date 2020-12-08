@@ -237,7 +237,7 @@ const Map = () => {
               "fill-opacity": 0.5,
             }
           })
-          console.log(map.getStyle().sources)
+          console.log("added buffer", map.getStyle().sources);
         }
         catch(err) {
           alert("this layer already exists");
