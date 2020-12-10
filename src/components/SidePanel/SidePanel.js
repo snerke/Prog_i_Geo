@@ -57,6 +57,22 @@ const SidePanel = (props) => {
               <input id="bufferInputField" placeholder="Buffer size (m)"></input>
               <button>buffer</button>
             </div>
+            <div>
+              Union
+              <select id="unionSelectLayer1">
+                <option>Choose layer</option>
+                {mapLayerArray.map((item) => (
+                <option id={item}>{item}</option>
+                ))}
+              </select>
+              <select id="unionSelectLayer2">
+                <option>Choose layer</option>
+                {mapLayerArray.map((item) => (
+                <option id={item}>{item}</option>
+                ))}
+              </select>
+              <button>Union</button>
+            </div>
           </div>
           <div>
             Layers:

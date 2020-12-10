@@ -97,7 +97,7 @@ const Map = () => {
       let functionality = document.getElementById('functionality');
       let buttons = functionality.getElementsByTagName('button');
 
-      function addNewLayer() {
+      function addLayers() {
         /*try{
           map.addSource("test-id", {
             type: "geojson",
@@ -183,6 +183,28 @@ const Map = () => {
         setMapLayers(map.getStyle().sources);
       }
 
+      function addNewLayer(layerName, data) {
+        try{
+          map.addSource(layerName, {
+            type: "geojson",
+            data: data,
+          })
+          map.addLayer({
+            "id": layerName,
+            "type": "fill",
+            "source": layerName,
+            "paint": {
+              "fill-color": randomizeColor(),
+              "fill-opacity": 0.5,
+            }
+          })
+          console.log(map.getStyle().sources)
+        }
+        catch(err) {
+          alert("This layer already exists");
+        }
+      }
+
       function removeNewLayer() {
         try{
           //map.removeLayer("test-id");
@@ -217,43 +239,71 @@ const Map = () => {
       }
 
       function createBuffer() {
-        let selectedLayer = document.getElementById("bufferSelectLayer").value;
-        let bufferSize = document.getElementById("bufferInputField").value/1000;
-        console.log("trying to get the correct layer", map.getSource(selectedLayer)._data)
-        let data2 = map.getSource(selectedLayer)._data.coordinates[0];
-        let poly1 = turf.polygon([data2]);
-        let bufferData = turf.buffer(poly1, bufferSize, {units: "kilometers"})
         try{
-          map.addSource("buffer_"+selectedLayer+"_"+(bufferSize*1000)+"m", {
-            type: "geojson",
-            data: bufferData,
-          })
-          map.addLayer({
-            "id": "buffer_"+selectedLayer+"_"+(bufferSize*1000)+"m",
-            "type": "fill",
-            "source": "buffer_"+selectedLayer+"_"+(bufferSize*1000)+"m",
-            "paint": {
-              "fill-color": randomizeColor(),
-              "fill-opacity": 0.5,
-            }
-          })
-          console.log(map.getStyle().sources)
+          let selectedLayer = document.getElementById("bufferSelectLayer").value;
+          let bufferSize = document.getElementById("bufferInputField").value/1000;
+          console.log("trying to get the correct layer", map.getSource(selectedLayer)._data)
+          let data2;
+          if(map.getSource(selectedLayer)._data.type == "Polygon") {
+            console.log("laget er et polygon");
+            data2 = map.getSource(selectedLayer)._data.coordinates[0];
+          } else if(map.getSource(selectedLayer)._data.type == "Feature") {
+            console.log("laget er en feature");
+            data2 = map.getSource(selectedLayer)._data.geometry.coordinates[0];
+          }
+          let poly1 = turf.polygon([data2]);
+          let bufferData = turf.buffer(poly1, bufferSize, {units: "kilometers"})
+          addNewLayer("buffer_"+selectedLayer+"_"+(bufferSize*1000)+"m", bufferData);
+          
         }
         catch(err) {
-          alert("this layer already exists");
+          alert("Something went wrong, did you remember to pick a layer and buffer width?");
         }
-        setMapLayers(map.getStyle().sources);
+      }
+
+      function createUnion() {
+        try{
+          let selectedLayer1 = document.getElementById("unionSelectLayer1").value;
+          let selectedLayer2 = document.getElementById("unionSelectLayer1").value;
+          //console.log("trying to get the correct layer", map.getSource(selectedLayer)._data)
+          let data1;
+          let data2;
+          if(map.getSource(selectedLayer1)._data.type == "Polygon") {
+            console.log("laget er et polygon");
+            data1 = map.getSource(selectedLayer1)._data.coordinates[0];
+          } else if(map.getSource(selectedLayer1)._data.type == "Feature") {
+            console.log("laget er en feature");
+            data1 = map.getSource(selectedLayer1)._data.geometry.coordinates[0];
+          }
+          if(map.getSource(selectedLayer2)._data.type == "Polygon") {
+            console.log("laget er et polygon");
+            data2 = map.getSource(selectedLayer2)._data.coordinates[0];
+          } else if(map.getSource(selectedLayer2)._data.type == "Feature") {
+            console.log("laget er en feature");
+            data2 = map.getSource(selectedLayer2)._data.geometry.coordinates[0];
+          }
+          let poly1 = turf.polygon([data1]);
+          let poly2 = turf.polygon([data2]);
+          let unionData = turf.union(poly1, poly2);
+          addNewLayer("union_"+selectedLayer1+"_"+selectedLayer2, unionData);
+        }
+        catch(err) {
+          alert("Could not create union, did you remember to pick two layers?");
+        }
       }
 
       for(let i = 0; i < buttons.length; i++) {
         if(buttons[i].textContent === "add") {
-          buttons[i].onclick = addNewLayer;
+          buttons[i].onclick = addLayers;
         }
         else if(buttons[i].textContent === "remove") {
           buttons[i].onclick = removeNewLayer;
         }
         else if(buttons[i].textContent === "buffer") {
           buttons[i].onclick = createBuffer;
+        }
+        else if(buttons[i].textContent === "Union") {
+          buttons[i].onclick = createUnion;
         }
       }
 
