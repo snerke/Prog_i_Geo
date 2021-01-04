@@ -1,0 +1,161 @@
+#sidepanel {
+  height: 100vh;
+  min-width: 343px;
+  width: 50vh;
+  overflow-y: scroll;
+  background-color: rgb(108, 135, 136);
+  box-sizing: padding-box;
+}
+
+.spinner {
+  height: 50px;
+  width: 50px;
+  margin: 0px auto;
+  -webkit-animation: rotation 0.6s infinite linear;
+  -moz-animation: rotation 0.6s infinite linear;
+  -o-animation: rotation 0.6s infinite linear;
+  animation: rotation 0.6s infinite linear;
+  border-left: 10px solid rgba(255, 255, 255, 0.5);
+  border-right: 10px solid rgba(255, 255, 255, 0.5);
+  border-bottom: 10px solid rgba(255, 255, 255, 0.5);
+  border-top: 10px solid rgba(37, 37, 37, 0.8);
+  border-radius: 100%;
+}
+
+@-webkit-keyframes rotation {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(359deg);
+  }
+}
+@-moz-keyframes rotation {
+  from {
+    -moz-transform: rotate(0deg);
+  }
+  to {
+    -moz-transform: rotate(359deg);
+  }
+}
+@-o-keyframes rotation {
+  from {
+    -o-transform: rotate(0deg);
+  }
+  to {
+    -o-transform: rotate(359deg);
+  }
+}
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
+
+.logo {
+  font-size: 36px;
+  padding: 10px 12px 10px 12px;
+  background-color: rgb(37, 37, 37);
+  color: white;
+  font-family: "Lucida Console", "Courier New", monospace;
+}
+
+.functionalitylist {
+  margin: 0 15px 50px 10px;
+}
+
+.functionalitylist select {
+  width: 50%;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.functionalitylist input[type="number"] {
+  width: 50%;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.functionalitylist button {
+  background-color: white;
+  border: none;
+  width: 25%;
+  color: black;
+  padding: 2px;
+  border-radius: 5px;
+  margin-right: 5px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+#addBaseLayersButton {
+  width: 48%;
+  margin-right: 2%;
+  height: 4vh;
+  min-height: 20px;
+  font-size: 100%;
+}
+
+#removeAllLayersButton {
+  background-color: red;
+  color: white;
+  width: 48%;
+  height: 4vh;
+  min-height: 20px;
+  font-size: 100%;
+}
+
+.dragdrop {
+  background-color: rgb(37, 37, 37);
+  width: 95%;
+  border: 2px;
+  border-style: solid;
+  border-color: white;
+  color: rgb(255, 255, 255);
+  list-style-type: none;
+  border-radius: 5px;
+  padding: 5px 10px 5px 10px;
+  cursor: grab;
+}
+
+.layerlist {
+  padding: 20px 20px 20px 10px;
+  margin: 0 0 0 0;
+}
+
+.colorpickerwrapper {
+  width: 10%;
+  float: right;
+  border-radius: 5px;
+  padding: 2px;
+  background-image: url("https://www.flaticon.com/svg/static/icons/svg/565/565789.svg");
+  background-origin: content-box;
+  background-repeat: no-repeat;
+  background-color: white;
+}
+
+input[type="color"] {
+  width: 100%;
+  opacity: 0;
+  border: 0;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+}
+
+.layerbutton {
+  background-color: white;
+  border: none;
+  width: 20%;
+  color: black;
+  padding: 2px;
+  border-radius: 5px;
+  margin-right: 5px;
+}
+
+.layerbuttons {
+  column-gap: 5px;
+}

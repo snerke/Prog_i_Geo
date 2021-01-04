@@ -1,64 +1,68 @@
-import React, { useEffect, useRef, useState } from "react";
-import mapboxgl from "mapbox-gl";
+import React from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
+import "./SidePanel.css";
 //import SidePanel from "../SidePanel/SidePanel";
-import testdata from "../../sample_data/befolkning_5km.json";
+//import testdata from "../../sample_data/befolkning_5km.json";
 
 
 const SidePanel = (props) => {
 
-  //console.log("ÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆÆ", map)
-  //console.log("\nSidePanel", props.mapLayers);
-  const [testMapLayers, setTestMapLayers] = useState([]);
+  //const [testMapLayers, setTestMapLayers] = useState([]);
   let mapLayerArray = [];
-  for (let layer in props.mapLayers) {
-    //console.log("current layer", layer);
-    if(layer != "composite") {
-      mapLayerArray.push(layer);
+  for (let i = 0; i < props.mapLayers.length; i++) {
+    if(props.mapLayers[i] !== "composite" && props.mapLayers[i] !== "mapbox") {
+      mapLayerArray.push(props.mapLayers[i]);
     }
   }
+  //reverses the order so that the top-most layer appears at the start of the array
+  mapLayerArray.reverse();
 
   
-
+  
   return (
-    <div style={styles.container}>
-      <div className="container">
+      <div id="sidepanel">
         <div>
-          <div id="menu">
-            <input
-                id="streets-v11"
-                type="radio"
-                name="rtoggle"
-                value="streets"
-                defaultChecked
-            />
-            <label htmlFor="streets-v11">streets</label>
-            <input id="light-v10" type="radio" name="rtoggle" value="light" />
-            <label htmlFor="light-v10">light</label>
-            <input id="dark-v10" type="radio" name="rtoggle" value="dark" />
-            <label htmlFor="dark-v10">dark</label>
-            <input id="outdoors-v11" type="radio" name="rtoggle" value="outdoors" />
-            <label htmlFor="outdoors-v11">outdoors</label>
-            <input id="satellite-v9" type="radio" name="rtoggle" value="satellite" />
-            <label htmlFor="satellite-v9">satellite</label>
+          <div className="logo">
+            sGIS
           </div>
-
-          <div id="functionality">
-            <button>add</button>
-            <button>remove</button>
-            <div>
-              Buffer
+           
+          <div id="functionality" className="functionalitylist">
+          <div>
+              <ul id="layerList" className="layerlist">
+                {mapLayerArray.map((item) => (
+                  <li draggable="true" id={item} className="dragdrop">
+                    {item.substring(0, 20) + ((item.length > 20) ? "...": "")}
+                    <div className="colorpickerwrapper" src="https://www.flaticon.com/svg/static/icons/svg/565/565789.svg">
+                      <input type="color" id={item} className="colorpicker"></input>
+                    </div>
+                    <div className="layerbuttons">
+                      <button id={item} className="layerbutton">
+                        Hide
+                      </button>
+                      <button id={item} className="layerbutton">
+                        Delete
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <button id="addBaseLayersButton">Add base layers</button>
+            <button id="removeAllLayersButton">Remove all layers</button>
+            <div id="loadingspinner" className="spinner" style={{display: "block"}}></div>
+            <div className="buffer">
+              <div>Buffer</div>
               <select id="bufferSelectLayer">
                 <option>Choose layer</option>
                 {mapLayerArray.map((item) => (
                 <option id={item}>{item}</option>
                 ))}
               </select>
-              <input id="bufferInputField" placeholder="Buffer size (m)"></input>
-              <button>buffer</button>
+              <input id="bufferInputField" type="number" placeholder="Buffer size (m)" min="0"></input>
+              <button id="bufferButton">Buffer</button>
             </div>
-            <div>
-              Union
+            <div className="union">
+              <div>Union</div>
               <select id="unionSelectLayer1">
                 <option>Choose layer</option>
                 {mapLayerArray.map((item) => (
@@ -71,34 +75,57 @@ const SidePanel = (props) => {
                 <option id={item}>{item}</option>
                 ))}
               </select>
-              <button>Union</button>
+              <button id="unionButton">Union</button>
             </div>
-          </div>
-          <div>
-            Layers:
-            {mapLayerArray.map((item) => (
-              <div>-{item}</div>
-            ))}
+            <div className="intersect">
+              <div>Intersect</div>
+              <select id="intersectSelectLayer1">
+                <option>Choose layer</option>
+                {mapLayerArray.map((item) => (
+                <option id={item}>{item}</option>
+                ))}
+              </select>
+              <select id="intersectSelectLayer2">
+                <option>Choose layer</option>
+                {mapLayerArray.map((item) => (
+                <option id={item}>{item}</option>
+                ))}
+              </select>
+              <button id="intersectButton">Intersect</button>
+            </div>
+            <div className="difference">
+              <div>Difference</div>
+              <select id="differenceSelectLayer1">
+                <option>Choose layer</option>
+                {mapLayerArray.map((item) => (
+                <option id={item}>{item}</option>
+                ))}
+              </select>
+              <select id="differenceSelectLayer2">
+                <option>Choose layer</option>
+                {mapLayerArray.map((item) => (
+                <option id={item}>{item}</option>
+                ))}
+              </select>
+              <button id="differenceButton">Difference</button>
+            </div>
+            <div className="newpoint">
+              <div>Create point</div>
+              <input id="createPointLong" type="number" placeholder="Longitude" min="-180" max="180"></input>
+              <input id="createPointLat" type="number" placeholder="Latitude" min="-85" max="85"></input>
+              <button id="createPointButton">
+                Create Point
+              </button>
+            </div>
+            
           </div>
         </div>
-
       </div>
-    </div>
   );
 };
 
 
-const styles = {
-  map: {
-    width: "80%",
-    height: "calc(90vh - 80px)",
-    padding: "50",
-  },
-  container: {
-    height: "100%",
-    backgroundColor: "green",
-  }
-};
+
 
 
 export default SidePanel;
