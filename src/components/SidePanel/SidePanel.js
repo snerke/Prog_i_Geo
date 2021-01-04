@@ -23,7 +23,7 @@ const SidePanel = (props) => {
       <div id="sidepanel">
         <div>
           <div className="logo">
-            sGIS
+            bGIS
           </div>
            
           <div id="functionality" className="functionalitylist">
