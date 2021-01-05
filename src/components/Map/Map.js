@@ -5,10 +5,11 @@ import SidePanel from "../SidePanel/SidePanel";
 import "./Map.css";
 import gloshaugen from "../../sample_data/gloshaugen.json";
 import test_points from "../../sample_data/test_points.json";
-import trondheim_vann from "../../sample_data/trondheim_vann.json";
-import trondheim_bygg from "../../sample_data/trondheim_bygg7.json";
-import trondheim_veg from "../../sample_data/trondheim_veg5.json";
+import trondheim_vann from "../../sample_data/trondheim_vann3.json";
+import trondheim_bygg from "../../sample_data/trondheim_bygg31.json";
+import trondheim_veg from "../../sample_data/trondheim_veg7.json";
 import * as turf from '@turf/turf';
+import buffer from "@turf/buffer";
 
 
 const Map = () => {
@@ -22,8 +23,8 @@ const Map = () => {
       const map = new mapboxgl.Map({
         container: mapContainer.current,
         style: "mapbox://styles/mapbox/streets-v11", // stylesheet location
-        center: [10.390645237668053, 63.420549355954904],
-        zoom: 13,
+        center: [10.4, 63.42],
+        zoom: 13.25,
       });
 
       map.addControl(new mapboxgl.NavigationControl());
@@ -83,10 +84,15 @@ const Map = () => {
         if(!("trondheim_bygg" in mapLayers)) {
           addNewLayer("trondheim_bygg", trondheim_bygg);
         }
-
         let mapSourceLength = Object.keys(map.getStyle().sources).length - 1;
-        let mapLayersInOrder = map.getStyle().layers.slice(-1 * mapSourceLength).map(function (obj) { return obj.id; });
-        setMapLayers(mapLayersInOrder);
+        if(mapSourceLength === 0) {
+          //in case the last layer was removed from the map, mapLayers is set to an empty array
+          setMapLayers([]);
+        } else {
+          //updates mapLayers if there are still layers left
+          let mapLayersInOrder = map.getStyle().layers.slice(-1 * mapSourceLength).map(function (obj) { return obj.id; });
+          setMapLayers(mapLayersInOrder);
+        }
         updateButtons();
       }
 
@@ -191,10 +197,12 @@ const Map = () => {
       function removeAllLayers() {
         try{
           let layerSources = map.getStyle().sources;
+          console.log(layerSources);
           setTimeout(() => {let i = 0;
             for (let layerSource in layerSources) {
-              if(i > 0) {
+              if(layerSource !== "composite") {
                 try{
+                  console.log(layerSource);
                   map.removeLayer(layerSource);
                   map.removeSource(layerSource);
                 }
@@ -253,9 +261,16 @@ const Map = () => {
             let bufferSize = document.getElementById("bufferInputField").value/1000;
             console.log(bufferSize);
             if(bufferSize > 0) {
-              let features = map.getSource(selectedLayer)._data.features;
-              let turfed = turf.featureCollection(features);
-              let bufferData = turf.buffer(turfed, bufferSize, {units: "kilometers"});
+              console.log(map.getSource(selectedLayer));
+              let turfed;
+              if (map.getSource(selectedLayer)._data.type === "FeatureCollection") {
+                turfed = map.getSource(selectedLayer)._data;
+              } else {
+                let features = map.getSource(selectedLayer)._data.features;
+                turfed = turf.featureCollection(features);
+              }
+              
+              let bufferData = buffer(turfed, bufferSize);
               addNewLayer(null, bufferData);
               setTimeout(() => {
                 let mapSourceLength = Object.keys(map.getStyle().sources).length - 1;
@@ -275,6 +290,7 @@ const Map = () => {
           }
           catch(err) {
             toggleSpinner();
+            console.log(err);
             alert("Please pick a layer and a buffer size");
           }
         }, 100);
@@ -415,7 +431,7 @@ const Map = () => {
                 if(currDiff.type === "Feature") {
                   currDiff = turf.featureCollection([currDiff]);
                 }
-                addNewLayer(null, currDiff);
+                addNewLayer(null, currDiff)
                 setTimeout(() => {
                   let mapSourceLength = Object.keys(map.getStyle().sources).length - 1;
                   if(mapSourceLength === 0) {
@@ -549,20 +565,26 @@ const Map = () => {
       //listener that detects if a draggable object is dropped and moves the corresponding layer to the wanted position with regards to the z-axis
       document.addEventListener('drop', function(event) {
         try {
+          console.log(map.getStyle().layers.slice(-1 * (Object.keys(map.getStyle().sources).length - 1)).map(function (obj) { return obj.id; }));
           event.preventDefault();
           let target = getLI( event.target );
           if ( target.style['border-bottom'] !== '' ) {
             target.style['border-bottom'] = '';
             target.parentNode.insertBefore(dragging, event.target.nextSibling);
+            console.log("a", dragging, event.target.nextSibling);
           } else {
             target.style['border-top'] = '';
             target.parentNode.insertBefore(dragging, event.target);
+            console.log("b", dragging, event.target);
           }
           if(dragging.previousSibling) {
             map.moveLayer(dragging.id, dragging.previousSibling.id);
+            console.log("c", dragging.id, dragging.previousSibling.id)
           } else {
             map.moveLayer(dragging.id);
+            console.log("d", dragging.id);
           }
+          console.log(map.getStyle().layers.slice(-1 * (Object.keys(map.getStyle().sources).length - 1)).map(function (obj) { return obj.id; }));
         }
         catch(err) {
         }

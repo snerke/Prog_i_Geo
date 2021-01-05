@@ -1,6 +1,7 @@
 #sidepanel {
   height: 100vh;
   min-width: 343px;
+  max-width: 350px;
   width: 50vh;
   overflow-y: scroll;
   background-color: rgb(108, 135, 136);
