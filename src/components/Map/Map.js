@@ -39,7 +39,6 @@ const Map = () => {
       //when the map is clicked a point will be made with those coordinates (can be cancelled)
       map.on("click", function(e) {
         let coords = e.lngLat;
-        console.log(coords);
           let data = {"type": "FeatureCollection", 
           "features": [
             {
@@ -194,12 +193,10 @@ const Map = () => {
       function removeAllLayers() {
         try{
           let layerSources = map.getStyle().sources;
-          console.log(layerSources);
           setTimeout(() => {
             for (let layerSource in layerSources) {
               if(layerSource !== "composite") {
                 try{
-                  console.log(layerSource);
                   map.removeLayer(layerSource);
                   map.removeSource(layerSource);
                 }
@@ -255,9 +252,7 @@ const Map = () => {
           try{
             let selectedLayer = document.getElementById("bufferSelectLayer").value;
             let bufferSize = document.getElementById("bufferInputField").value/1000;
-            console.log(bufferSize);
             if(bufferSize > 0) {
-              console.log(map.getSource(selectedLayer));
               let turfed;
               if (map.getSource(selectedLayer)._data.type === "FeatureCollection") {
                 turfed = map.getSource(selectedLayer)._data;
@@ -286,7 +281,6 @@ const Map = () => {
           }
           catch(err) {
             toggleSpinner();
-            console.log(err);
             alert("Please pick a layer and a buffer size");
           }
         }, 100);
@@ -350,9 +344,7 @@ const Map = () => {
             let selectedLayer2 = document.getElementById("intersectSelectLayer2").value;
             let layerType1 = map.getSource(selectedLayer1)._data.features[0].geometry.type.replace("Multi", "");
             let layerType2 = map.getSource(selectedLayer2)._data.features[0].geometry.type.replace("Multi", "");
-            console.log(layerType1, layerType2);
             if(layerType1 === "Polygon" && layerType2 === "Polygon") {
-              console.log("hei", map.getSource(selectedLayer1), map.getSource(selectedLayer2));
               //turf.intersect accepts single features, so it is needed to iterate through the features and combining them into a single feature
               let unioned =  map.getSource(selectedLayer1)._data.features[0];
               if(map.getSource(selectedLayer1)._data.features.length > 1) {
@@ -360,24 +352,19 @@ const Map = () => {
                   unioned = turf.union(unioned, map.getSource(selectedLayer1)._data.features[i]);
                 }
               }
-              console.log("hei2");
               //instead of finding the intersection, we find first find the difference between the two layers
               let currDiff = turf.difference(unioned, map.getSource(selectedLayer2)._data.features[0]);
               for(let i = 1; i < map.getSource(selectedLayer2)._data.features.length; i++) {
                 currDiff = turf.difference(currDiff, map.getSource(selectedLayer2)._data.features[i]);
               }
-              console.log("hei3")
               //then we find the difference between the first layer and the difference from earlier to get the intersection
               let intersected = turf.difference(unioned, currDiff);
               for(let i = 1; i < map.getSource(selectedLayer2)._data.features.length; i++) {
-                console.log(i, map.getSource(selectedLayer2)._data.features.length, map.getSource(selectedLayer2)._data.features[i])
                 intersected = turf.difference(intersected, map.getSource(selectedLayer2)._data.features[i]);
               }
-              console.log("hei4")
               if(intersected.type === "Feature") {
                 intersected = turf.featureCollection([intersected]);
               }
-              console.log("hei5")
               //doing difference twice instead of doing intersection once will probably affect run time, but it was easier working with difference as it accepts multipolygons
               addNewLayer(null, intersected)
               setTimeout(() => {
@@ -398,7 +385,6 @@ const Map = () => {
           }
           catch(err) {
             toggleSpinner();
-            console.log(err)
             alert("Please pick two polygon layers");
           }
         }, 100);
@@ -466,7 +452,7 @@ const Map = () => {
         let longCoord = parseFloat(document.getElementById("createPointLong").value);
         let latCoord = parseFloat(document.getElementById("createPointLat").value);
         //creates a feature collection from the point
-        if(!isNaN(longCoord) && !isNaN(latCoord)) {
+        if((!isNaN(longCoord) && !isNaN(latCoord)) && (longCoord <= 180 && longCoord >= -180) && (latCoord <= 85 && latCoord >= -85) ) {
           let data = {"type": "FeatureCollection", 
             "features": [
               {
@@ -569,7 +555,6 @@ const Map = () => {
       //listener that detects if a draggable object is dropped and moves the corresponding layer to the wanted position with regards to the z-axis
       document.addEventListener('drop', function(event) {
         try {
-          console.log(map.getStyle().layers.slice(-1 * (Object.keys(map.getStyle().sources).length - 1)).map(function (obj) { return obj.id; }));
           event.preventDefault();
           let target = getLI( event.target );
           if ( target.style['border-bottom'] !== '' ) {
