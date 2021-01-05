@@ -4,8 +4,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import SidePanel from "../SidePanel/SidePanel";
 import "./Map.css";
 import gloshaugen from "../../sample_data/gloshaugen.json";
-import test_points from "../../sample_data/test_points.json";
-import trondheim_vann from "../../sample_data/trondheim_vann3.json";
+import trondheim_vann from "../../sample_data/trondheim_vann4.json";
 import trondheim_bygg from "../../sample_data/trondheim_bygg31.json";
 import trondheim_veg from "../../sample_data/trondheim_veg7.json";
 import * as turf from '@turf/turf';
@@ -40,6 +39,7 @@ const Map = () => {
       //when the map is clicked a point will be made with those coordinates (can be cancelled)
       map.on("click", function(e) {
         let coords = e.lngLat;
+        console.log(coords);
           let data = {"type": "FeatureCollection", 
           "features": [
             {
@@ -71,9 +71,6 @@ const Map = () => {
         let mapLayers = map.getStyle().sources;
         if(!("gloshaugen" in mapLayers)) {
           addNewLayer("gloshaugen", gloshaugen);
-        }
-        if(!("test_points" in mapLayers)) {
-          addNewLayer("test_points", test_points);
         }
         if(!("trondheim_vann" in mapLayers)) {
           addNewLayer("trondheim_vann", trondheim_vann);
@@ -198,7 +195,7 @@ const Map = () => {
         try{
           let layerSources = map.getStyle().sources;
           console.log(layerSources);
-          setTimeout(() => {let i = 0;
+          setTimeout(() => {
             for (let layerSource in layerSources) {
               if(layerSource !== "composite") {
                 try{
@@ -210,7 +207,6 @@ const Map = () => {
                   alert(err);
                 }
               }
-              i++;
             }}, 350);
         }
         catch(err) {
@@ -354,7 +350,9 @@ const Map = () => {
             let selectedLayer2 = document.getElementById("intersectSelectLayer2").value;
             let layerType1 = map.getSource(selectedLayer1)._data.features[0].geometry.type.replace("Multi", "");
             let layerType2 = map.getSource(selectedLayer2)._data.features[0].geometry.type.replace("Multi", "");
+            console.log(layerType1, layerType2);
             if(layerType1 === "Polygon" && layerType2 === "Polygon") {
+              console.log("hei", map.getSource(selectedLayer1), map.getSource(selectedLayer2));
               //turf.intersect accepts single features, so it is needed to iterate through the features and combining them into a single feature
               let unioned =  map.getSource(selectedLayer1)._data.features[0];
               if(map.getSource(selectedLayer1)._data.features.length > 1) {
@@ -362,19 +360,24 @@ const Map = () => {
                   unioned = turf.union(unioned, map.getSource(selectedLayer1)._data.features[i]);
                 }
               }
+              console.log("hei2");
               //instead of finding the intersection, we find first find the difference between the two layers
               let currDiff = turf.difference(unioned, map.getSource(selectedLayer2)._data.features[0]);
               for(let i = 1; i < map.getSource(selectedLayer2)._data.features.length; i++) {
                 currDiff = turf.difference(currDiff, map.getSource(selectedLayer2)._data.features[i]);
               }
+              console.log("hei3")
               //then we find the difference between the first layer and the difference from earlier to get the intersection
               let intersected = turf.difference(unioned, currDiff);
               for(let i = 1; i < map.getSource(selectedLayer2)._data.features.length; i++) {
+                console.log(i, map.getSource(selectedLayer2)._data.features.length, map.getSource(selectedLayer2)._data.features[i])
                 intersected = turf.difference(intersected, map.getSource(selectedLayer2)._data.features[i]);
               }
+              console.log("hei4")
               if(intersected.type === "Feature") {
                 intersected = turf.featureCollection([intersected]);
               }
+              console.log("hei5")
               //doing difference twice instead of doing intersection once will probably affect run time, but it was easier working with difference as it accepts multipolygons
               addNewLayer(null, intersected)
               setTimeout(() => {
@@ -395,6 +398,7 @@ const Map = () => {
           }
           catch(err) {
             toggleSpinner();
+            console.log(err)
             alert("Please pick two polygon layers");
           }
         }, 100);
@@ -571,20 +575,26 @@ const Map = () => {
           if ( target.style['border-bottom'] !== '' ) {
             target.style['border-bottom'] = '';
             target.parentNode.insertBefore(dragging, event.target.nextSibling);
-            console.log("a", dragging, event.target.nextSibling);
           } else {
             target.style['border-top'] = '';
             target.parentNode.insertBefore(dragging, event.target);
-            console.log("b", dragging, event.target);
           }
           if(dragging.previousSibling) {
             map.moveLayer(dragging.id, dragging.previousSibling.id);
-            console.log("c", dragging.id, dragging.previousSibling.id)
           } else {
             map.moveLayer(dragging.id);
-            console.log("d", dragging.id);
           }
-          console.log(map.getStyle().layers.slice(-1 * (Object.keys(map.getStyle().sources).length - 1)).map(function (obj) { return obj.id; }));
+          setMapLayers([]);
+          setTimeout(() => {
+            let mapSourceLength = Object.keys(map.getStyle().sources).length - 1;
+              if(mapSourceLength === 0) {
+                setMapLayers([]);
+              } else {
+                let mapLayersInOrder = map.getStyle().layers.slice(-1 * mapSourceLength).map(function (obj) { return obj.id; });
+                setMapLayers(mapLayersInOrder);
+              }
+            updateButtons();
+          }, 25);
         }
         catch(err) {
         }
@@ -601,6 +611,7 @@ const Map = () => {
           }
       }
 
+      //switches between showing and hiding the spinner indicating that the application is working
       function toggleSpinner() {
         let spinner = document.getElementById("loadingspinner");
         if(spinner.style.display === "block") {
@@ -610,6 +621,7 @@ const Map = () => {
         }
       }
 
+      //updates the buttons to ensure that the buttons to new layers works
       function updateButtons() {
         let functionality = document.getElementById('functionality');
         let buttons = functionality.getElementsByTagName('button');
@@ -643,14 +655,9 @@ const Map = () => {
           }
         }
       }
-
     };
-    
-
     if (!map) initializeMap({ setMap, mapContainer });
   }, [map, mapLayers]);
-
-
 
   return (
     <div>

@@ -7,7 +7,6 @@ import "./SidePanel.css";
 
 const SidePanel = (props) => {
 
-  //const [testMapLayers, setTestMapLayers] = useState([]);
   let mapLayerArray = [];
   for (let i = 0; i < props.mapLayers.length; i++) {
     if(props.mapLayers[i] !== "composite" && props.mapLayers[i] !== "mapbox") {
@@ -16,8 +15,6 @@ const SidePanel = (props) => {
   }
   //reverses the order so that the top-most layer appears at the start of the array
   mapLayerArray.reverse();
-
-  
   
   return (
       <div id="sidepanel">
@@ -117,15 +114,11 @@ const SidePanel = (props) => {
                 Create Point
               </button>
             </div>
-            
           </div>
         </div>
       </div>
   );
 };
-
-
-
 
 
 export default SidePanel;
