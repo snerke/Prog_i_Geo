@@ -20,7 +20,7 @@ const SidePanel = (props) => {
       <div id="sidepanel">
         <div>
           <div className="logo">
-            bGIS
+            Test
           </div>
            
           <div id="functionality" className="functionalitylist">
