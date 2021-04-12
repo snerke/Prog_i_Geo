@@ -19,9 +19,7 @@ const SidePanel = (props) => {
   return (
       <div id="sidepanel">
         <div>
-          <div className="logo">
-            bGIS
-          </div>
+          
            
           <div id="functionality" className="functionalitylist">
           <div>
@@ -46,7 +44,6 @@ const SidePanel = (props) => {
             </div>
             <button id="addBaseLayersButton">Add base layers</button>
             <button id="removeAllLayersButton">Remove all layers</button>
-            <div id="loadingspinner" className="spinner" style={{display: "block"}}></div>
             <div className="buffer">
               <div>Buffer</div>
               <select id="bufferSelectLayer">

@@ -10,60 +10,527 @@ import trondheim_veg from "../../sample_data/trondheim_veg7.json";
 import * as turf from '@turf/turf';
 import buffer from "@turf/buffer";
 
-
 const Map = () => {
   const [map, setMap] = useState(null);
   const [mapLayers, setMapLayers] = useState([]);
   const mapContainer = useRef(null);
+  let currentDate = useRef(null)
 
   useEffect(() => {
     mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_KEY;
     const initializeMap = ({ setMap, mapContainer }) => {
       const map = new mapboxgl.Map({
         container: mapContainer.current,
-        style: "mapbox://styles/mapbox/streets-v11", // stylesheet location
-        center: [10.4, 63.42],
-        zoom: 13.25,
+        style: "mapbox://styles/mapbox/satellite-v9", // stylesheet location
+        center: [-25, 45],
+        zoom: 3,
       });
 
-      map.addControl(new mapboxgl.NavigationControl());
+    let halifax = [-63.582687, 44.651070];
+    let belfast_lough = [-5.785, 54.691];
+    let avonmouth = [-2.6987, 51.5034];
+    let milford_haven = [-5.0341, 51.7128];
+    let st_john_nb = [-66.0628, 45.2796];
+    let swansea = [-3.943646, 51.621441];
+    let sydney_cb = [-60.195556, 46.136389];
+    let liverpool = [-2.983333, 53.400002];
+    let father_point = [-68.461111, 48.513889];
+    let clyde = [-4.629179, 55.458565];
 
-      map.on("load", () => {
-        setMap(map);
-        setMapLayers([]);
-        map.resize();
-        updateButtons();
-        toggleSpinner();
+
+    let totalRouteNames = [["Halifax", halifax], ["Belfast Lough", belfast_lough], ["Avonmouth", avonmouth], ["Milford Haven", milford_haven]]
+    let totalroute = [st_john_nb, halifax, belfast_lough, avonmouth, milford_haven, st_john_nb, halifax, belfast_lough, swansea, milford_haven,
+    halifax, belfast_lough, avonmouth, milford_haven, halifax];
+    
+    let dates = ["Jan. 7, 1942", "Jan. 9 - Jan. 13, 1942"];
+    currentDate.current = dates[0];
+
+    for (let i = 0; i < totalRouteNames.length; i++) {
+      console.log("ÆÆÆ", totalRouteNames[i])
+    }
+    
+    // A simple line from origin to destination.
+    let route = {
+    'type': 'FeatureCollection',
+    'features': [
+    {
+    'type': 'Feature',
+    'geometry': {
+    'type': 'LineString',
+    'coordinates': totalroute
+    }
+    }
+    ]
+    };
+
+    
+    // A single point that animates along the route.
+    // Coordinates are initially set to origin.
+    let point = {
+    'type': 'FeatureCollection',
+    'features': [
+    {
+    'type': 'Feature',
+    'properties': {},
+    'geometry': {
+    'type': 'Point',
+    'coordinates': halifax
+    }
+    }
+    ]
+    };
+
+
+    map.loadImage(
+      'https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png',
+      function (error, image) {
+      if (error) throw error;
+      map.addImage('custom-marker', image);
+      // Add a GeoJSON source with 2 points
+      map.addSource('points', {
+      'type': 'geojson',
+      'data': {
+      'type': 'FeatureCollection',
+      'features': [
+      /*
+      let halifax = [-63.582687, 44.651070];
+      let belfast_lough = [-5.785, 54.691];
+      let avonmouth = [-2.6987, 51.5034];
+      let milford_haven = [-5.0341, 51.7128];
+      let st_john_nb = [-66.0628, 45.2796];
+      let swansea = [-3.943646, 51.621441];
+      let sydney_cb = [-60.195556, 46.136389];
+      let liverpool = [-2.983333, 53.400002];
+      let father_point = [-68.461111, 48.513889];
+      let clyde = [-4.629179, 55.458565];
+      */
+      {
+        'type': 'Feature',
+        'geometry': {
+        'type': 'Point',
+        'coordinates': clyde
+        },
+        'properties': {
+        'title': 'Clyde,\nSkottland'
+        }
+        },
+     {
+      'type': 'Feature',
+      'geometry': {
+      'type': 'Point',
+      'coordinates': liverpool
+      },
+      'properties': {
+      'title': 'Liverpool,\nEngland',
+      }
+      },
+      {
+        'type': 'Feature',
+        'geometry': {
+        'type': 'Point',
+        'coordinates': sydney_cb
+        },
+        'properties': {
+        'title': 'Sydney, C.B.,\nCanada'
+        }
+        },
+     {
+      'type': 'Feature',
+      'geometry': {
+      'type': 'Point',
+      'coordinates': swansea
+      },
+      'properties': {
+      'title': 'Swansea,\nWales'
+      }
+      },
+     {
+      'type': 'Feature',
+      'geometry': {
+      'type': 'Point',
+      'coordinates': st_john_nb
+      },
+      'properties': {
+      'title': 'St. John, N.B.,\nCanada'
+      }
+      },
+     {
+      'type': 'Feature',
+      'geometry': {
+      'type': 'Point',
+      'coordinates': milford_haven
+      },
+      'properties': {
+      'title': 'Milford Haven,\nWales'
+      }
+      },
+      {
+      'type': 'Feature',
+      'geometry': {
+      'type': 'Point',
+      'coordinates': avonmouth
+      },
+      'properties': {
+      'title': 'Avonmouth,\nEngland'
+      }
+      },
+      {
+      'type': 'Feature',
+      'geometry': {
+      'type': 'Point',
+      'coordinates': halifax
+      },
+      'properties': {
+      'title': 'Halifax,\nCanada'
+      }
+      },
+      {
+      'type': 'Feature',
+      'geometry': {
+      'type': 'Point',
+      'coordinates': belfast_lough
+      },
+      'properties': {
+      'title': 'Belfast Lough,\nNorthern Ireland'
+      }
+      }
+      ]
+      }
       });
+       
+      // Add a symbol layer
+      /*map.addLayer({
+        'id': 'points',
+        'type': 'symbol',
+        'source': 'points',
+        'layout': {
+          'icon-image': 'custom-marker',
+          // get the title name from the source's "title" property
+          'text-field': ['get', 'title'],
+          'text-font': [
+            'Open Sans Semibold',
+            'Arial Unicode MS Bold'
+          ],
+          'text-offset': [0, 1.25],
+          'text-anchor': 'top'
+        },
+        paint: {
+          "text-color": "white"
+        }
+      });*/
+      }
+      );
 
-      //when the map is clicked a point will be made with those coordinates (can be cancelled)
-      map.on("click", function(e) {
-        let coords = e.lngLat;
-          let data = {"type": "FeatureCollection", 
-          "features": [
-            {
-              "type": "Feature",
-              "geometry": {
-                "type": "Point",
-                "coordinates": [
-                  coords.lng,
-                  coords.lat
-                ]
-              }
-            }]
-          }
-          addNewLayer(null, data);
-          setTimeout(() => {
-            let mapSourceLength = Object.keys(map.getStyle().sources).length - 1;
-            if(mapSourceLength === 0) {
-              setMapLayers([]);
-            } else {
-              let mapLayersInOrder = map.getStyle().layers.slice(-1 * mapSourceLength).map(function (obj) { return obj.id; });
-              setMapLayers(mapLayersInOrder);
+
+
+
+    let currentRoute = 0;
+
+    let lines = []
+    console.log("b", route.features[0].geometry.coordinates)
+    for(let i = 0; i<route.features[0].geometry.coordinates.length-1; i++) {
+      let line = {
+        "type": "Feature",
+        "properties": {},
+        "geometry": {
+          "type": "Line",
+          "coordinates": [route.features[0].geometry.coordinates[i], route.features[0].geometry.coordinates[i+1]]
+        }
+      }
+      console.log(line)
+      lines.push(line);
+      console.log("lines", lines)
+    }
+
+    console.log("HER", lines[0])
+
+    let routes = {
+      "type": "FeatureCollection",
+      "features": lines
+    }
+    console.log("routes", routes);
+    
+    // Calculate the distance in kilometers between route start/end point.
+    let lineDistance = turf.length(route.features[0]);
+    console.log("lineDistance", lineDistance)
+
+    /*let steps2 = 500;
+    let arc2;
+
+    for (let i = 0; i < routes.features.length - 1; i++) {
+      let pointA;
+      let pointB;
+
+      let currLine = {
+        'type': 'FeatureCollection',
+        'features': [
+          {
+            'type': 'Feature',
+            'geometry': {
+              'type': 'LineString',
+              'coordinates': [pointA, pointB]
             }
-            updateButtons();
-          }, 500);
+          }
+        ]
+      };
+      route.features[0].geometry.coordinates = arc2;
+
+      
+    }*/
+
+    //blir ikke brukt..
+    function animateLine(currentRoute) {
+      console.log("animateLine");
+      
+      let pointA = routes.features[currentRoute];
+      let pointB = routes.features[currentRoute + 1];
+
+      let arc = []
+      
+      for (let i = 0; i < lineDistance; i += lineDistance / steps) {
+        let segment = turf.along(route.features[0], i);
+        arc.push(segment.geometry.coordinates);
+      }
+
+      currentRoute += 1;
+      if (currentRoute > routes.features) {
+        currentRoute = 0;
+      }
+    }
+
+
+    let arc = [];
+    
+    // Number of steps to use in the arc and animation, more steps means
+    // a smoother arc and animation, but too many steps will result in a
+    // low frame rate
+    let steps = 500 * (totalroute.length - 1);
+    
+    // Draw an arc between the `origin` & `destination` of the two points
+    for (let i = 0; i < lineDistance; i += lineDistance / steps) {
+      let segment = turf.along(route.features[0], i);
+      arc.push(segment.geometry.coordinates);
+    }
+
+
+
+    
+    // Update the route with calculated arc coordinates
+    route.features[0].geometry.coordinates = arc;
+    
+    // Used to increment the value of the point measurement against the route.
+    let counter = 0;
+    
+    map.on('load', function () {
+    // Add a source and layer displaying a point which will be animated in a circle.
+    map.addSource('route', {
+    'type': 'geojson',
+    'data': route
+    });
+
+    
+    map.addSource('point', {
+    'type': 'geojson',
+    'data': point
+    });
+    
+    map.addLayer({
+    'id': 'route',
+    'source': 'route',
+    'type': 'line',
+    'paint': {
+    'line-width': 2,
+    'line-color': '#007cbf'
+    }
+    });
+
+    map.addLayer({
+      'id': 'points',
+      'type': 'symbol',
+      'source': 'points',
+      'layout': {
+        'icon-image': 'custom-marker',
+        // get the title name from the source's "title" property
+        'text-field': ['get', 'title'],
+        'text-font': [
+          'Open Sans Semibold',
+          'Arial Unicode MS Bold'
+        ],
+        'text-offset': [0, 1.25],
+        'text-anchor': 'top'
+      },
+      paint: {
+        "text-color": "white"
+      }
+    });
+
+
+    
+    map.addLayer({
+    'id': 'point',
+    'source': 'point',
+    'type': 'symbol',
+    'layout': {
+    'icon-image': 'ferry-15',
+    'icon-rotate': ['get', 'bearing'],
+    'icon-rotation-alignment': 'map',
+    'icon-allow-overlap': true,
+    'icon-ignore-placement': true
+    }
+    });
+
+    let point_a;
+    let point_b;
+
+
+    //Prøve å få denne til å kjøre for hver strekning
+    /*for (let i = 0; i < totalroute.length - 1; i++ ) {
+      console.log("DUM FOR-LOOP");
+      //console.log("RUTE", i)
+      let arc = [];
+      point_a = totalroute[i];
+      point_b = totalroute[i+1];
+      let route = {
+        'type': 'FeatureCollection',
+        'features': [
+          {
+            'type': 'Feature',
+            'geometry': {
+              'type': 'LineString',
+              'coordinates': [point_a, point_b]
+            }
+          }
+          ]
+        };
+      let lineDistance = turf.length(route.features[0]);
+      //console.log("lineDistance", lineDistance)
+      counter = 0;
+      // Number of steps to use in the arc and animation, more steps means
+      // a smoother arc and animation, but too many steps will result in a
+      // low frame rate
+      // Draw an arc between the `origin` & `destination` of the two points
+      for (let i = 0; i < lineDistance; i += lineDistance / steps) {
+        let segment = turf.along(route.features[0], i);
+        arc.push(segment.geometry.coordinates);
+      }
+      // Update the route with calculated arc coordinates
+      route.features[0].geometry.coordinates = arc;
+      animate(counter, point_a);
+
+    }*/
+    let route_animate;
+    //animere en del per klikk
+    let route_counter = 0;
+    map.flyTo({
+      center: halifax,
+      zoom: 5.8,
+    })
+    document.getElementById('replay')
+    document.addEventListener('click', function () {
+      console.log("KUL KLIKK-RUTE", route_counter);
+      console.log("RUTE", route_counter)
+      let arc = [];
+      point_a = totalroute[route_counter];
+      point_b = totalroute[route_counter+1];
+      route_animate = {
+        'type': 'FeatureCollection',
+        'features': [
+          {
+            'type': 'Feature',
+            'geometry': {
+              'type': 'LineString',
+              'coordinates': [point_a, point_b]
+            }
+          }
+          ]
+        };
+      let lineDistance = turf.length(route_animate.features[0]);
+      console.log("lineDistance", lineDistance)
+      counter = 0;
+      // Number of steps to use in the arc and animation, more steps means
+      // a smoother arc and animation, but too many steps will result in a
+      // low frame rate
+      let steps = 150;      
+      // Draw an arc between the `origin` & `destination` of the two points
+      for (let i = 0; i < lineDistance * 1.10; i += (lineDistance) / (steps) ) {
+        let segment = turf.along(route_animate.features[0], i);
+        arc.push(segment.geometry.coordinates);
+      }
+      // Update the route with calculated arc coordinates
+      route_animate.features[0].geometry.coordinates = arc;
+      animate(counter, point_a, point_b);
+      map.flyTo({
+        center: point_b,
+        zoom: 5.95,
+        speed: 0.8,
+        essential: true // this animation is considered essential with respect to prefers-reduced-motion
       });
+      currentDate.current = dates[route_counter]
+      console.log("currentDate: ", currentDate)
+      /*if (route_counter >= totalroute.length) {
+        route_counter = 0;
+      }
+      // Set the coordinates of the original point back to origin
+      //point.features[0].geometry.coordinates = origin;
+      
+      point.features[0].geometry.coordinates = totalroute[route_counter]
+
+      // Update the source layer
+      map.getSource('point').setData(point);
+      
+      // Reset the counter
+      counter = 0;
+      
+      //  Restart the animation
+      animate(counter);*/
+      route_counter += 1;
+    });
+    
+    //faktiske animasjonsfunksjonen
+    function animate() {
+      console.log(route_counter)
+      console.log("a", point_a, "b", point_b);
+      //console.log("POINT", point_a)
+      //console.log("animate @201")
+      let start =
+      route_animate.features[0].geometry.coordinates[
+      counter >= steps ? counter - 1 : counter
+      ];
+      let end =
+      route_animate.features[0].geometry.coordinates[
+      counter >= steps ? counter : counter + 1
+      ];
+      if (!start || !end) return;
+      
+      // Update point geometry to a new position based on counter denoting
+      // the index to access the arc
+      point.features[0].geometry.coordinates = route_animate.features[0].geometry.coordinates[counter];
+      
+      // Calculate the bearing to ensure the icon is rotated to match the route arc
+      // The bearing is calculated between the current point and the next point, except
+      // at the end of the arc, which uses the previous point and the current point
+      point.features[0].properties.bearing = turf.bearing(
+      turf.point(start),
+      turf.point(end)
+      );
+      
+      // Update the source with this new data
+      map.getSource('point').setData(point);
+      
+      // Request the next frame of animation as long as the end has not been reached
+      if (counter < steps) {
+        requestAnimationFrame(animate);
+      }
+      
+      counter = counter + 1;
+    }
+    
+
+    
+    
+      // Start the animation
+      //animate(counter);
+    });
 
       //add base layers to the map and sets mapLayers
       function addLayers() {
@@ -647,10 +1114,20 @@ const Map = () => {
   return (
     <div>
       <div className="container">
-        <SidePanel mapLayers={mapLayers}/>
+        
         <div className="mapcontainer">
           <div ref={el => (mapContainer.current = el)} className="map" />
+          <div class="map-overlay top">
+            <div class="map-overlay-inner">
+              <fieldset>
+                <label>Dato:</label>
+                <label>her {mapContainer.currentDate} her</label>
+                <div id="swatches"></div>
+              </fieldset>
+            </div>
+          </div>
         </div>
+        <div className="datecontainer">Dato: {mapContainer.currentDate}</div>
       </div>
     </div>
   );
