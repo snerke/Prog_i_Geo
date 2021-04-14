@@ -13,8 +13,9 @@ import buffer from "@turf/buffer";
 const Map = () => {
   const [map, setMap] = useState(null);
   const [mapLayers, setMapLayers] = useState([]);
+  const [currentDate, setCurrentDate] = useState("-")
   const mapContainer = useRef(null);
-  let currentDate = useRef(null)
+  //let currentDate = useRef(null)
 
   useEffect(() => {
     mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_KEY;
@@ -42,8 +43,8 @@ const Map = () => {
     let totalroute = [st_john_nb, halifax, belfast_lough, avonmouth, milford_haven, st_john_nb, halifax, belfast_lough, swansea, milford_haven,
     halifax, belfast_lough, avonmouth, milford_haven, halifax];
     
-    let dates = ["Jan. 7, 1942", "Jan. 9 - Jan. 13, 1942"];
-    currentDate.current = dates[0];
+    let dates = ["-", "Jan. 7, 1942 - Jan. 9, 1942", "Jan. 13, 1942 - Jan. 28, 1942", "Jan. 29, 1942 - Jan. 30, 1942", "Feb. 11, 1942 - Feb. 12, 1942", "Feb. 13, 1942 - Mar. 2, 1942", "Mar. 12, 1942 - Mar. 13, 1942", "Mar. 15, 1942 - Mar. 26, 1942", "Mar. 28, 1942 - Mar. 29, 1942", "Apr. 8, 1942 - Apr. 8, 1942", "Apr. 9, 1942 - Apr. 22, 1942", "Mai 10, 1942 - Mai 21, 1942", "Mai 23, 1942 - Mai 25, 1942", "14", "15"];
+    //setCurrentDate(dates[0]);
 
     for (let i = 0; i < totalRouteNames.length; i++) {
       console.log("ÆÆÆ", totalRouteNames[i])
@@ -237,12 +238,12 @@ const Map = () => {
           "coordinates": [route.features[0].geometry.coordinates[i], route.features[0].geometry.coordinates[i+1]]
         }
       }
-      console.log(line)
+      //console.log(line)
       lines.push(line);
-      console.log("lines", lines)
+      //console.log("lines", lines)
     }
 
-    console.log("HER", lines[0])
+    //console.log("HER", lines[0])
 
     let routes = {
       "type": "FeatureCollection",
@@ -300,7 +301,6 @@ const Map = () => {
 
 
     let arc = [];
-    
     // Number of steps to use in the arc and animation, more steps means
     // a smoother arc and animation, but too many steps will result in a
     // low frame rate
@@ -327,7 +327,6 @@ const Map = () => {
     'type': 'geojson',
     'data': route
     });
-
     
     map.addSource('point', {
     'type': 'geojson',
@@ -363,8 +362,6 @@ const Map = () => {
         "text-color": "white"
       }
     });
-
-
     
     map.addLayer({
     'id': 'point',
@@ -445,7 +442,7 @@ const Map = () => {
           ]
         };
       let lineDistance = turf.length(route_animate.features[0]);
-      console.log("lineDistance", lineDistance)
+      //console.log("lineDistance", lineDistance)
       counter = 0;
       // Number of steps to use in the arc and animation, more steps means
       // a smoother arc and animation, but too many steps will result in a
@@ -465,7 +462,6 @@ const Map = () => {
         speed: 0.8,
         essential: true // this animation is considered essential with respect to prefers-reduced-motion
       });
-      currentDate.current = dates[route_counter]
       console.log("currentDate: ", currentDate)
       /*if (route_counter >= totalroute.length) {
         route_counter = 0;
@@ -484,12 +480,21 @@ const Map = () => {
       //  Restart the animation
       animate(counter);*/
       route_counter += 1;
+      changeDate(route_counter)
     });
+
+    function changeDate(route_counter) {
+      console.log(currentDate)
+      console.log("trying to set current date");
+      setCurrentDate(dates[route_counter]);
+      console.log(currentDate)
+      console.log("current date hopefully set")
+    }
     
     //faktiske animasjonsfunksjonen
     function animate() {
-      console.log(route_counter)
-      console.log("a", point_a, "b", point_b);
+      //console.log(route_counter)
+      //console.log("a", point_a, "b", point_b);
       //console.log("POINT", point_a)
       //console.log("animate @201")
       let start =
@@ -1120,14 +1125,13 @@ const Map = () => {
           <div class="map-overlay top">
             <div class="map-overlay-inner">
               <fieldset>
-                <label>Dato:</label>
-                <label>her {mapContainer.currentDate} her</label>
+                <label>Avreise - Ankomst:</label>
+                <label>{currentDate}</label>
                 <div id="swatches"></div>
               </fieldset>
             </div>
           </div>
         </div>
-        <div className="datecontainer">Dato: {mapContainer.currentDate}</div>
       </div>
     </div>
   );
